@@ -26,7 +26,6 @@ const Sections = () => {
         };
       });
 
-      console.log(arr, "arr");
       setSections(arr);
     }
   };
@@ -39,23 +38,23 @@ const Sections = () => {
           title: name,
           position: position,
         });
-        console.log("Success");
         alert("New section created");
         getSections();
         setName("");
         setPosition("");
       } catch (err) {
-        console.log("Error:", err);
         alert("Error: " + err.message);
       }
     } else {
       try {
-        const dataRef = ref(database?.default?.db, "sections/" + selectedData.id);
+        const dataRef = ref(
+          database?.default?.db,
+          "sections/" + selectedData.id
+        );
         await set(dataRef, {
           title: name,
           position: position,
         });
-        console.log("Success");
         alert("Section updated successfully");
         getSections();
         setIsUpdate(false);
@@ -63,7 +62,6 @@ const Sections = () => {
         setName("");
         setPosition("");
       } catch (err) {
-        console.log("Error:", err);
         alert("Error: " + err.message);
       }
     }
@@ -73,11 +71,9 @@ const Sections = () => {
     try {
       const dataRef = ref(database?.default?.db, "sections/" + id);
       await remove(dataRef);
-      console.log("Success");
       alert("Section deleted successfully");
       getSections();
     } catch (err) {
-      console.log("Error:", err);
       alert("Error: " + err.message);
     }
   };

@@ -13,8 +13,7 @@ const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const login = () => {
-    console.log(username, "username");
-    if (username === "admin" && password === "neptune123") {
+    if (username === "admin" && password === "neptune12345") {
       setIsLoggedIn(true);
     } else {
       alert("Wrong username or password");

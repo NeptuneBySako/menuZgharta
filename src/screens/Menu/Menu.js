@@ -29,7 +29,6 @@ const Menu = () => {
     if (snapshot.exists()) {
       let data = snapshot.val();
 
-      console.log(data?.main_image?.imageUrl, "data");
       setImageUrl(data?.main_image?.imageUrl);
     }
   };
@@ -46,14 +45,12 @@ const Menu = () => {
         };
       });
       getCategories(arr[0].id);
-      console.log(arr, "arr");
       setSections(arr);
     }
   };
 
   const getCategories = async (id) => {
     setSelectedSection(id);
-    console.log(id, "id");
     //get categories
     const dataRef = ref(database?.default?.db, "categories");
     const categoriesQuery = query(
@@ -78,7 +75,6 @@ const Menu = () => {
   };
 
   const getItems = async (id) => {
-    console.log(id, "id");
     let itemsArr = [];
     const itemsRef = ref(database?.default?.db, "items");
     const itemsQuery = query(
@@ -102,7 +98,7 @@ const Menu = () => {
   };
 
   useEffect(() => {
-    console.log(selectedSection, "selectedSection");
+    // console.log(selectedSection, "selectedSection");
   }, [sections, categories, items, selectedSection]);
   return (
     <Fragment>
@@ -134,14 +130,12 @@ const Menu = () => {
             sections={sections}
             onClick={(section) => {
               getCategories(section?.id);
-              console.log(section, "section");
             }}
           />
           <CategoriesTabs
             categories={categories}
             onClick={(cat) => {
               getItems(cat?.id);
-              console.log(cat, "cat");
             }}
             selectedSection={selectedSection}
           />

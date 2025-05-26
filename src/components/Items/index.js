@@ -33,7 +33,7 @@ const Items = () => {
         };
       });
 
-      console.log(arr, "arr");
+      setSelectedCat(arr?.[0]?.id);
       setCategories(arr);
     }
   };
@@ -48,7 +48,6 @@ const Items = () => {
           category_id: selectedCat,
           description: description,
         });
-        console.log("Success");
         alert("New item created");
         getItems();
         setName("");
@@ -56,27 +55,17 @@ const Items = () => {
         setSelectedCat("");
         setDescription("");
       } catch (err) {
-        console.log("Error:", err);
         alert("Error: " + err.message);
       }
     } else {
-      console.log(selectedData, "!23321 update item");
       try {
-        console.log(name, "name");
-        console.log(price, "price");
-
-        console.log(selectedCat, "selectedCat");
-        console.log(description, "description");
-
         const dataRef = ref(database?.default?.db, "items/" + selectedData.id);
-        console.log(dataRef, "dataRef");
         await set(dataRef, {
           title: name,
           price: price,
           category_id: selectedCat,
           description: description,
         });
-        console.log("Success");
         alert("Item updated successfully");
         getItems();
         setIsUpdate(false);
@@ -86,7 +75,6 @@ const Items = () => {
         setSelectedCat("");
         setDescription("");
       } catch (err) {
-        console.log("Error:", err);
         alert("Error: " + err.message);
       }
     }
@@ -96,11 +84,9 @@ const Items = () => {
     try {
       const dataRef = ref(database?.default?.db, "items/" + id);
       await remove(dataRef);
-      console.log("Success");
       alert("Item deleted successfully");
       getItems();
     } catch (err) {
-      console.log("Error:", err);
       alert("Error: " + err.message);
     }
   };
@@ -117,7 +103,6 @@ const Items = () => {
         };
       });
 
-      console.log(arr, "arr");
       setItems(arr);
       setAllItems(arr);
     }
@@ -230,8 +215,8 @@ const Items = () => {
                   <td>{capitalizeFirstLetter(item.title)}</td>
                   <td>
                     {capitalizeFirstLetter(
-                      categories.find((x) => x.id === item?.category_id).title
-                    )}
+                      categories.find((x) => x.id === item?.category_id)?.title
+                    ) ?? ""}
                   </td>
                   <td>{item.price ? `$${item?.price}` : ""}</td>
                   <td>

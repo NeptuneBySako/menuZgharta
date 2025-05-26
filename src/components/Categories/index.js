@@ -43,6 +43,8 @@ const Categories = () => {
           id: id,
         };
       });
+      setSelectedSection(arr?.[0]?.id);
+
       setSections(arr);
     }
   };
@@ -65,7 +67,10 @@ const Categories = () => {
       }
     } else {
       try {
-        const dataRef = ref(database?.default?.db, "categories/" + selectedData.id);
+        const dataRef = ref(
+          database?.default?.db,
+          "categories/" + selectedData.id
+        );
         await set(dataRef, {
           title: name,
           position: position,

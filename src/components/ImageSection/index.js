@@ -9,7 +9,6 @@ const ImageSection = () => {
   const [progress, setProgress] = useState(0);
 
   const handleImageChange = (e) => {
-    console.log("123");
     if (e.target.files[0]) {
       setImage(e.target.files[0]);
       setPreviewURL(URL.createObjectURL(e.target.files[0]));
@@ -43,14 +42,12 @@ const ImageSection = () => {
   };
 
   const saveImageData = (url) => {
-    console.log(image, "image?.name");
     const imageRef = dbRef(database?.default.db, `images/main_image`);
     set(imageRef, {
       imageUrl: url,
     })
       .then(() => {
         // Handle success - image URL successfully saved
-        console.log(`image successfully saved to the database!`);
         alert("Image URL saved successfully!");
       })
       .catch((error) => {
