@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/menuZgharta/static/css/main.3e337503.css",
-    "main.js": "/menuZgharta/static/js/main.d1cbefc0.js",
+    "main.css": "/menuZgharta/static/css/main.d20eee12.css",
+    "main.js": "/menuZgharta/static/js/main.ec2ce8b3.js",
     "static/js/453.e454b3b9.chunk.js": "/menuZgharta/static/js/453.e454b3b9.chunk.js",
     "static/media/image1.jpg": "/menuZgharta/static/media/image1.ad43cd4fead0348d2557.jpg",
     "static/media/PlaywriteCU-Thin.ttf": "/menuZgharta/static/media/PlaywriteCU-Thin.34c971eee715436dbe7e.ttf",
@@ -10,12 +10,12 @@
     "static/media/logo.png": "/menuZgharta/static/media/logo.a82a51a9fb5f087719d8.png",
     "static/media/image2.jpeg": "/menuZgharta/static/media/image2.e0bc6379d20931cf89cb.jpeg",
     "index.html": "/menuZgharta/index.html",
-    "main.3e337503.css.map": "/menuZgharta/static/css/main.3e337503.css.map",
-    "main.d1cbefc0.js.map": "/menuZgharta/static/js/main.d1cbefc0.js.map",
+    "main.d20eee12.css.map": "/menuZgharta/static/css/main.d20eee12.css.map",
+    "main.ec2ce8b3.js.map": "/menuZgharta/static/js/main.ec2ce8b3.js.map",
     "453.e454b3b9.chunk.js.map": "/menuZgharta/static/js/453.e454b3b9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3e337503.css",
-    "static/js/main.d1cbefc0.js"
+    "static/css/main.d20eee12.css",
+    "static/js/main.ec2ce8b3.js"
   ]
 }
