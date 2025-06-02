@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/menuZgharta/static/css/main.3e337503.css",
-    "main.js": "/menuZgharta/static/js/main.8c1360bd.js",
+    "main.js": "/menuZgharta/static/js/main.d1cbefc0.js",
     "static/js/453.e454b3b9.chunk.js": "/menuZgharta/static/js/453.e454b3b9.chunk.js",
     "static/media/image1.jpg": "/menuZgharta/static/media/image1.ad43cd4fead0348d2557.jpg",
     "static/media/PlaywriteCU-Thin.ttf": "/menuZgharta/static/media/PlaywriteCU-Thin.34c971eee715436dbe7e.ttf",
@@ -11,11 +11,11 @@
     "static/media/image2.jpeg": "/menuZgharta/static/media/image2.e0bc6379d20931cf89cb.jpeg",
     "index.html": "/menuZgharta/index.html",
     "main.3e337503.css.map": "/menuZgharta/static/css/main.3e337503.css.map",
-    "main.8c1360bd.js.map": "/menuZgharta/static/js/main.8c1360bd.js.map",
+    "main.d1cbefc0.js.map": "/menuZgharta/static/js/main.d1cbefc0.js.map",
     "453.e454b3b9.chunk.js.map": "/menuZgharta/static/js/453.e454b3b9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3e337503.css",
-    "static/js/main.8c1360bd.js"
+    "static/js/main.d1cbefc0.js"
   ]
 }
