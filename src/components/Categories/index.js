@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ref, set, push, get, remove, update } from "firebase/database";
 import * as database from "../../firebase/firebase.config";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
@@ -9,7 +9,6 @@ const Categories = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedData, setSelectedData] = useState();
-  const [position, setPosition] = useState();
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState();
   const [draggedItem, setDraggedItem] = useState(null);
@@ -61,15 +60,18 @@ const Categories = () => {
     if (!isUpdate) {
       try {
         const newDocRef = push(ref(database?.default?.db, "categories"));
+        const newPosition =
+          categories.filter((cat) => cat.section === selectedSection).length +
+          1;
+
         await set(newDocRef, {
           title: name,
-          position: categories?.length + 1,
+          position: newPosition,
           section: selectedSection,
         });
         alert("New category created");
         getCategories();
         setName("");
-        setPosition("");
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -81,7 +83,7 @@ const Categories = () => {
         );
         await set(dataRef, {
           title: name,
-          position: position,
+          position: selectedData.position, // Keep existing position when updating
           section: selectedSection,
         });
         alert("Category updated successfully");
@@ -89,7 +91,6 @@ const Categories = () => {
         setIsUpdate(false);
         setSelectedData();
         setName("");
-        setPosition("");
       } catch (err) {
         alert("Error: " + err.message);
       }
@@ -113,208 +114,197 @@ const Categories = () => {
     e.dataTransfer.setData("text/html", e.target.parentNode);
   };
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e, item) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    // Only allow drop if the target is in the same section
+    if (draggedItem && draggedItem.section === item.section) {
+      e.dataTransfer.dropEffect = "move";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
   };
 
-  const handleDrop = async (e, targetIndex) => {
+  const handleDrop = async (e, targetItem) => {
     e.preventDefault();
-    if (!draggedItem) return;
-
-    // Get the target category to determine the section
-    const targetCategory = categories[targetIndex];
-    const targetSection = targetCategory.section;
-
-    // Filter categories by the target section
-    const sectionCategories = categories.filter(
-      (cat) => cat.section === targetSection
-    );
-
-    // Find the actual position within the section
-    let actualPositionInSection = 0;
-    for (let i = 0; i < targetIndex; i++) {
-      if (categories[i].section === targetSection) {
-        actualPositionInSection++;
-      }
+    if (!draggedItem || draggedItem.section !== targetItem.section) {
+      setDraggedItem(null);
+      return;
     }
 
-    // Find the current index of the dragged item
-    const currentIndex = categories.findIndex(
-      (item) => item.id === draggedItem.id
+    // Find all categories in the same section
+    const sectionCategories = categories.filter(
+      (cat) => cat.section === draggedItem.section
     );
 
-    if (currentIndex !== -1 && currentIndex !== targetIndex) {
-      // Create a new array with the item moved to the new position
-      const newCategories = [...categories];
-      const [removed] = newCategories.splice(currentIndex, 1);
+    // Find current and target indices in the full array
+    const currentIndex = categories.findIndex(
+      (cat) => cat.id === draggedItem.id
+    );
+    const targetIndex = categories.findIndex((cat) => cat.id === targetItem.id);
 
-      // Update the section if moving to a different section
-      if (draggedItem.section !== targetSection) {
-        removed.section = targetSection;
+    if (
+      currentIndex === -1 ||
+      targetIndex === -1 ||
+      currentIndex === targetIndex
+    ) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // Create a new array with the category moved to the new position
+    const newCategories = [...categories];
+    const [removed] = newCategories.splice(currentIndex, 1);
+    newCategories.splice(targetIndex, 0, removed);
+
+    // Update positions for all categories in the section
+    const updatedCategories = newCategories.map((cat) => {
+      if (cat.section === draggedItem.section) {
+        // Find the new position within the section
+        const pos = newCategories
+          .filter((c) => c.section === draggedItem.section)
+          .findIndex((c) => c.id === cat.id);
+        return {
+          ...cat,
+          position: pos + 1,
+        };
       }
+      return cat;
+    });
 
-      newCategories.splice(targetIndex, 0, removed);
+    setCategories(updatedCategories);
 
-      // Update positions for all categories in the target section
-      const updatedCategories = newCategories.map((item, index) => {
-        // Only update positions for items in the target section
-        if (item.section === targetSection) {
-          // Find the position within the section
-          let pos = 0;
-          for (let i = 0; i < index; i++) {
-            if (newCategories[i].section === targetSection) {
-              pos++;
-            }
-          }
-          return {
-            ...item,
-            position: pos + 1,
-          };
-        }
-        return item;
-      });
+    // Update positions in Firebase
+    try {
+      const updates = {};
+      updatedCategories
+        .filter((cat) => cat.section === draggedItem.section)
+        .forEach((cat) => {
+          updates[`categories/${cat.id}/position`] = cat.position;
+        });
 
-      setCategories(updatedCategories);
-
-      // Update all positions in Firebase
-      try {
-        // Create a batch update object
-        const updates = {};
-
-        // Only update categories in the target section
-        updatedCategories
-          .filter((cat) => cat.section === targetSection)
-          .forEach((item) => {
-            updates[`categories/${item.id}/position`] = item.position;
-            // Update section if changed
-            if (
-              item.id === draggedItem.id &&
-              draggedItem.section !== targetSection
-            ) {
-              updates[`categories/${item.id}/section`] = targetSection;
-            }
-          });
-
-        // Get the database reference
-        const dbRef = ref(database?.default?.db);
-
-        // Update all positions in a single transaction
-        await update(dbRef, updates);
-
-        alert("Categories updated successfully");
-      } catch (err) {
-        console.error("Error updating categories:", err);
-        alert("Error updating categories: " + err.message);
-        // Revert if there's an error
-        getCategories();
-      }
+      await update(ref(database?.default?.db), updates);
+    } catch (err) {
+      console.error("Error updating categories:", err);
+      getCategories(); // Revert on error
     }
 
     setDraggedItem(null);
   };
 
   return (
-    <div>
-      <div className="flex flex-col items-start border-b border-b-black w-full p-2">
-        <h2>{isUpdate ? "Update Category" : "Add New Category"}</h2>
-        <div className="flex items-center justify-start">
+    <div className="p-4">
+      <div className="flex flex-col items-start border-b border-gray-200 w-full p-4 mb-6">
+        <h2 className="text-xl font-bold mb-4">
+          {isUpdate ? "Update Category" : "Add New Category"}
+        </h2>
+        <div className="flex items-center gap-3 w-full">
           <input
             type="text"
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
+            onChange={(e) => setName(e.target.value)}
             value={name}
             placeholder="Category name"
-            className="mt-3 mb-3 border p-2 mr-3"
+            className="flex-1 p-2 border rounded"
           />
           <select
-            className="mt-3 mb-3 border p-2 mr-3"
+            className="flex-1 p-2 border rounded"
             value={selectedSection}
-            onChange={(e) => {
-              setSelectedSection(e.target.value);
-            }}
+            onChange={(e) => setSelectedSection(e.target.value)}
           >
-            {sections?.map((item) => {
-              return <option value={item?.id}>{item?.title}</option>;
-            })}
+            {sections?.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title}
+              </option>
+            ))}
           </select>
-          {/* <input
-            type="number"
-            onChange={(e) => {
-              setPosition(e.target.value);
-            }}
-            value={position}
-            placeholder="Position in menu"
-            className="mt-3 mb-3 border p-2 mr-3"
-          /> */}
-          <button
-            className="flex items-center justify-center bg-slate-200 w-full pt-2 pb-2 pl-4 pr-4"
-            onClick={() => {
-              saveData();
-            }}
-          >
-            {isUpdate ? "Update" : "Add"}
-          </button>
         </div>
+        <button
+          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 mt-5"
+          onClick={saveData}
+        >
+          {isUpdate ? "Update" : "Add"}
+        </button>
       </div>
-      <div className="w-full p-2">
-        <table>
-          <thead>
+
+      <div className="w-full overflow-x-auto">
+        <table className="min-w-full border">
+          <thead className="bg-gray-50">
             <tr>
-              <th>No.</th>
-              <th>Name</th>
-              <th>Section</th>
-              <th>Position In Menu</th>
-              <th>Actions</th>
+              <th className="p-3 text-left border">No.</th>
+              <th className="p-3 text-left border">Name</th>
+              <th className="p-3 text-left border">Section</th>
+              <th className="p-3 text-left border">Position</th>
+              <th className="p-3 text-left border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {categories?.map((item, index) => {
-              const sectionTitle = sections.find(
-                (s) => s.id === item.section
-              )?.title;
+            {sections.map((section) => {
+              const sectionCategories = categories
+                .filter((cat) => cat.section === section.id)
+                .sort((a, b) => a.position - b.position);
+
+              if (sectionCategories.length === 0) return null;
+
               return (
-                <tr
-                  key={item.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, item)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  style={{
-                    cursor: "move",
-                    backgroundColor:
-                      draggedItem?.id === item.id ? "#f0f0f0" : "transparent",
-                  }}
-                >
-                  <td>{index + 1}</td>
-                  <td>{capitalizeFirstLetter(item.title)}</td>
-                  <td>{capitalizeFirstLetter(sectionTitle)}</td>
-                  <td>{item.position}</td>
-                  <td>
-                    <div className="flex items-center justify-center">
-                      <button
-                        className="mr-5"
-                        onClick={() => {
-                          setIsUpdate(true);
-                          setSelectedData(item);
-                          setName(item?.title);
-                          setPosition(item?.position);
-                          setSelectedSection(item?.section);
-                        }}
-                      >
-                        <FiEdit />
-                      </button>
-                      <button
-                        onClick={() => {
-                          deleteCategory(item?.id);
-                        }}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <React.Fragment key={`section-${section.id}`}>
+                  <tr className="bg-gray-100">
+                    <td colSpan="5" className="p-3 font-bold border">
+                      {capitalizeFirstLetter(section.title)}
+                    </td>
+                  </tr>
+                  {sectionCategories.map((category, index) => (
+                    <tr
+                      key={category.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, category)}
+                      onDragOver={(e) => handleDragOver(e, category)}
+                      onDrop={(e) => handleDrop(e, category)}
+                      className={`hover:bg-gray-50 ${
+                        draggedItem?.id === category.id ? "bg-blue-50" : ""
+                      }`}
+                      style={{
+                        cursor:
+                          draggedItem?.section === category.section
+                            ? "move"
+                            : "no-drop",
+                        opacity:
+                          draggedItem &&
+                          draggedItem.section !== category.section
+                            ? 0.5
+                            : 1,
+                      }}
+                    >
+                      <td className="p-3 border">{index + 1}</td>
+                      <td className="p-3 border">
+                        {capitalizeFirstLetter(category.title)}
+                      </td>
+                      <td className="p-3 border">
+                        {capitalizeFirstLetter(section.title)}
+                      </td>
+                      <td className="p-3 border">{category.position}</td>
+                      <td className="p-3 border">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={() => {
+                              setIsUpdate(true);
+                              setSelectedData(category);
+                              setName(category.title);
+                              setSelectedSection(category.section);
+                            }}
+                          >
+                            <FiEdit size={18} />
+                          </button>
+                          <button
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => deleteCategory(category.id)}
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               );
             })}
           </tbody>
