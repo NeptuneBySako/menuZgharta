@@ -44,6 +44,7 @@ const Menu = () => {
           id: id,
         };
       });
+      arr.sort((a, b) => a.position - b.position);
       getCategories(arr[0].id);
       setSections(arr);
     }
@@ -70,6 +71,7 @@ const Menu = () => {
         };
       });
     }
+    categoriesArr.sort((a, b) => a.position - b.position);
     getItems(categoriesArr[0]?.id);
     setCategories(categoriesArr);
   };
@@ -94,7 +96,7 @@ const Menu = () => {
       });
     }
 
-    setItems(itemsArr);
+    setItems(itemsArr.sort((a, b) => a.position - b.position));
   };
 
   useEffect(() => {

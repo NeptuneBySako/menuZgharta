@@ -100,7 +100,7 @@ const Dashboard = () => {
             >
               Items
             </button>
-            <button
+            {/* <button
               className="ml-3 p-2 w-full"
               style={{
                 backgroundColor: selectedTab === 3 ? "#C4C4C4" : "transparent",
@@ -110,7 +110,7 @@ const Dashboard = () => {
               }}
             >
               Main Image
-            </button>
+            </button> */}
           </div>
           <div>
             {selectedTab === 0 ? (
