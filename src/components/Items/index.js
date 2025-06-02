@@ -293,12 +293,12 @@ const Items = () => {
                 </option>
               ))}
             </select>
-            <button
+            {/* <button
               onClick={initializePositions}
               className="bg-blue-500 text-white p-2 rounded"
             >
               Initialize Positions
-            </button>
+            </button> */}
           </div>
           <textarea
             type="text"
